@@ -13,20 +13,24 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>xlsx-parser</name>
 	<description>Demo project for Spring Boot</description>
+
 	<properties>
 		<java.version>17</java.version>
+		<poi.version>4.1.2</poi.version>
+		<commons-fileupload.version>1.5</commons-fileupload.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>4.1.2</version>
+			<version>${poi.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>4.1.2</version>
+			<version>${poi.version}</version>
 		</dependency>
 
 		<dependency>
@@ -43,7 +47,7 @@
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.5</version>
+			<version>${commons-fileupload.version}</version>
 			<scope>test</scope>
 		</dependency>
 
