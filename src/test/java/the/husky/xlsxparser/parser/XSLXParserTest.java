@@ -29,6 +29,7 @@ class XSLXParserTest {
             "280 школа Євгенія Харченка вул., 23Б, Євгенія Харченка вул., 23Б";
     private final static String LOCATION_GYMNASIUM =
             "Київська Русь Гімназія Бориса Гмирі вул., 2В, Бориса Гмирі вул., 2В";
+        private static final int SHEET_INDEX = 0;
 
     @Autowired private XSLXParser xslxParser;
 
@@ -63,7 +64,7 @@ class XSLXParserTest {
 
         MultipartFile multipartFile = getMultipartFile(fileContent);
 
-        List<TemplateInfo> list = xslxParser.parseXlsxFile(multipartFile);
+        List<TemplateInfo> list = xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX);
 
         int expectedSize = 36;
         String expectedJson = getExpectedJson();
@@ -84,7 +85,8 @@ class XSLXParserTest {
 
         MultipartFile multipartFile = getMultipartFile(fileContent);
 
-        Throwable thrown = assertThrows(XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile) );
+        Throwable thrown = assertThrows
+                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX));
 
         String expectedErrorMessage = "Error occurred while parsing xlsx file";
         String actualErrorMessage = thrown.getMessage();
@@ -103,7 +105,8 @@ class XSLXParserTest {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 fileContent);
 
-        Throwable thrown = assertThrows(XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile));
+        Throwable thrown = assertThrows
+                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX));
 
         String expectedErrorMessage = "Error occurred while parsing xlsx file";
         String actualErrorMessage = thrown.getMessage();
