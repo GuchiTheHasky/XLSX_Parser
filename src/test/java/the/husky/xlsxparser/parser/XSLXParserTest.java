@@ -4,13 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 import the.husky.xlsxparser.entity.TemplateInfo;
+import the.husky.xlsxparser.web.exception.XSLXParserException;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,53 +23,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DisplayName("XSLXParser unit tests")
+@TestPropertySource(locations = "classpath:test_app.properties")
 class XSLXParserTest {
-    private final static String LOCATION = "280 школа Євгенія Харченка вул., 23Б, Євгенія Харченка вул., 23Б";
-    private final static String LOCATION2 = "Київська Русь Гімназія Бориса Гмирі вул., 2В, Бориса Гмирі вул., 2В";
+    private final static String LOCATION_SCHOOL =
+            "280 школа Євгенія Харченка вул., 23Б, Євгенія Харченка вул., 23Б";
+    private final static String LOCATION_GYMNASIUM =
+            "Київська Русь Гімназія Бориса Гмирі вул., 2В, Бориса Гмирі вул., 2В";
 
-    private static XSLXParser xslxParser;
-
-    @BeforeAll
-    public static void init() {
-        xslxParser = new XSLXParser();
-    }
+    @Autowired private XSLXParser xslxParser;
 
     @Test
-    @DisplayName("Should parse xlsx file")
-    public void test1() {
+    @DisplayName("Test, get address.")
+    public void testGetAddress() {
         String expected = "Євгенія Харченка вул., 23Б, Євгенія Харченка вул., 23Б";
-        String actual = xslxParser.getAddress(LOCATION);
+        String actual = xslxParser.getAddress(LOCATION_SCHOOL);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("Should parse xlsx file")
-    public void test2() {
+    @DisplayName("Test, get client name.")
+    public void testGetClientName() {
         String expected = "280 школа";
-        String actual = xslxParser.getClientName(LOCATION);
+        String actual = xslxParser.getClientName(LOCATION_SCHOOL);
 
         assertEquals(expected, actual);
 
         String expected2 = "Київська Русь";
-        String actual2 = xslxParser.getClientName(LOCATION2);
+        String actual2 = xslxParser.getClientName(LOCATION_GYMNASIUM);
 
         assertEquals(expected2, actual2);
     }
 
     @Test
-    @DisplayName("Should parse xlsx file")
-    public void test3() throws IOException {
+    @DisplayName("Test, should parse xlsx file, check size and json.")
+    public void testParseXSLXFileCheckSizeAndContent() throws IOException {
         String fileName = "test_template.xlsx";
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
-        byte[] fileContent = FileUtils.readFileToByteArray(file);
+        byte[] fileContent = getFileContent(fileName); 
 
-        MultipartFile multipartFile = new MockMultipartFile(
-                "test_template.xlsx",
-                "test_template.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                fileContent);
+        MultipartFile multipartFile = getMultipartFile(fileContent);
 
         List<TemplateInfo> list = xslxParser.parseXlsxFile(multipartFile);
 
@@ -82,11 +76,62 @@ class XSLXParserTest {
         assertEquals(expectedJson, actualJson);
     }
 
+    @Test
+    @DisplayName("Test, throw XSLXParserException, when file has invalid content.")
+    public void testThrowExceptionIfMultipartFileHasInvalidContent() throws IOException {
+        String fileName = "test_invalid_content.xlsx";
+        byte[] fileContent = getFileContent(fileName);
+
+        MultipartFile multipartFile = getMultipartFile(fileContent);
+
+        Throwable thrown = assertThrows(XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile) );
+
+        String expectedErrorMessage = "Error occurred while parsing xlsx file";
+        String actualErrorMessage = thrown.getMessage();
+        assertEquals(expectedErrorMessage, actualErrorMessage);
+    }
+
+    @Test
+    @DisplayName("Test, throw XSLXParserException, when file has invalid format.")
+    public void testThrowExceptionIfMultipartFileHasInvalidFormat() throws IOException {
+        String fileName = "test_invalid_format.docx";
+        byte[] fileContent = getFileContent(fileName);
+
+        MultipartFile multipartFile = new MockMultipartFile(
+                "test_invalid_format.docx",
+                "test_invalid_format.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                fileContent);
+
+        Throwable thrown = assertThrows(XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile));
+
+        String expectedErrorMessage = "Error occurred while parsing xlsx file";
+        String actualErrorMessage = thrown.getMessage();
+        assertEquals(expectedErrorMessage, actualErrorMessage);
+    }
+
+    private static MockMultipartFile getMultipartFile(byte[] fileContent) {
+        return new MockMultipartFile(
+                "test_invalid_content.xlsx",
+                "test_invalid_content.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileContent);
+    }
 
     private String templateInfoToJson(TemplateInfo templateInfo) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         return objectMapper.writeValueAsString(templateInfo).replaceAll("\r\n", "\n");
+    }
+
+    private byte[] getFileContent(String fileName) throws IOException {
+        File file = getFile(fileName);
+        return FileUtils.readFileToByteArray(file);
+    }
+
+    private File getFile(String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        return new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
     }
 
     private String getExpectedJson() {

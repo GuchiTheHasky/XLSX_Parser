@@ -19,5 +19,5 @@ public interface XSLXFileHandler {
      * @return A list of {@link TemplateInfo} objects extracted from the file.
      */
 
-    List<TemplateInfo> getTemplateInfo(MultipartFile file);
+    List<TemplateInfo> getTemplateInfo(MultipartFile file, int sheetIndex);
 }

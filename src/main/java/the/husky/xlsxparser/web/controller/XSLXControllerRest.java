@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import the.husky.xlsxparser.entity.TemplateInfo;
-import the.husky.xlsxparser.service.XSLXService;
+import the.husky.xlsxparser.service.XSLXFileHandler;
 
 import java.util.List;
 
@@ -16,10 +17,12 @@ import java.util.List;
 @RequestMapping("/rest")
 public class XSLXControllerRest {
 
-    private final XSLXService xslxService;
+    private final XSLXFileHandler fileHandler;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<TemplateInfo> parseXlsxFile(MultipartFile file) {
-        return xslxService.getTemplateInfo(file);
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<TemplateInfo> parseXlsxFile(MultipartFile file, @RequestParam int sheetIndex) {
+        return fileHandler.getTemplateInfo(file, sheetIndex);
     }
 }

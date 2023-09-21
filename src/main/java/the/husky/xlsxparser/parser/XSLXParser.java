@@ -1,10 +1,12 @@
 package the.husky.xlsxparser.parser;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import the.husky.xlsxparser.entity.TemplateInfo;
@@ -16,18 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class XSLXParser {
 
-    public List<TemplateInfo> parseXlsxFile(MultipartFile file) {
+    @Value("${xslxparser.locationRowIndex}")
+    private int locationRowIndex;
+
+    @Value("${xslxparser.weightRowIndex}")
+    private int weightRowIndex;
+
+    public List<TemplateInfo> parseXlsxFile(MultipartFile file, int sheetIndex) {
         List<TemplateInfo> templateEntities = new ArrayList<>();
 
         if (!file.isEmpty()) {
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
                  Workbook workbook = new XSSFWorkbook(inputStream)) {
-                Sheet sheet = workbook.getSheetAt(0);
 
-                int locationRowIndex = 1;
-                int weightRowIndex = 25;
+                Sheet sheet = workbook.getSheetAt(sheetIndex);
 
                 int columnCount = sheet.getRow(locationRowIndex).getLastCellNum();
 
@@ -52,8 +59,9 @@ public class XSLXParser {
                         templateEntities.add(templateInfo);
                     }
                 }
-            } catch (IOException e) {
-                throw new XSLXParserException("Error occurred while parsing xlsx file", e.getCause());
+            } catch (RuntimeException | IOException e) {
+                log.error("Error occurred while parsing xlsx file", e.getCause());
+                throw new XSLXParserException("Error occurred while parsing xlsx file", e);
             }
         }
         return templateEntities;

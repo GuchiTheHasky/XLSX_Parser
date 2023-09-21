@@ -13,7 +13,7 @@ import java.util.List;
 public class XSLXService implements XSLXFileHandler {
     private final XSLXParser xslxParser;
 
-    public List<TemplateInfo> getTemplateInfo(MultipartFile file) {
-        return xslxParser.parseXlsxFile(file);
+    public List<TemplateInfo> getTemplateInfo(MultipartFile file, int sheetIndex) {
+        return xslxParser.parseXlsxFile(file, sheetIndex);
     }
 }
