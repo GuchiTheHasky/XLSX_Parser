@@ -9,5 +9,4 @@ public class XlsxParserApplication {
     public static void main(String[] args) {
         SpringApplication.run(XlsxParserApplication.class, args);
     }
-
 }

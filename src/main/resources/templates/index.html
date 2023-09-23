@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Goods Partner Demo Function</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+<h1>Goods Partner Demo Feature</h1>
+
+<div id="fileUploadSection">
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Завантажити</button>
+</div>
+
+
+<div id="task_list">
+    <a href="/xlsx/all">Список завдань</a>
+</div>
+
+<p/>
+
+<script>
+    function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const selectedFile = fileInput.files[0];
+
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            fetch('xlsx', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Файл успішно завантажено.');
+                } else {
+                    alert('Помилка при завантаженні.');
+                }
+            })
+            .catch(error => {
+                console.error('Помилка:', error);
+            });
+        } else {
+            alert('Будь ласка, виберіть файл для завантаження.');
+        }
+    }
+</script>
+</body>
+</html>
+

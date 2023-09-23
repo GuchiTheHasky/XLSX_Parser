@@ -9,7 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import the.husky.xlsxparser.entity.TemplateInfo;
+import the.husky.xlsxparser.entity.Task;
 import the.husky.xlsxparser.web.exception.XSLXParserException;
 
 import java.io.ByteArrayInputStream;
@@ -21,14 +21,17 @@ import java.util.List;
 @Slf4j
 public class XSLXParser {
 
+    @Value("${xslxparser.sheetIndex}")
+    private int sheetIndex;
+
     @Value("${xslxparser.locationRowIndex}")
     private int locationRowIndex;
 
     @Value("${xslxparser.weightRowIndex}")
     private int weightRowIndex;
 
-    public List<TemplateInfo> parseXlsxFile(MultipartFile file, int sheetIndex) {
-        List<TemplateInfo> templateEntities = new ArrayList<>();
+    public List<Task> parseXlsxFile(MultipartFile file) {
+        List<Task> templateEntities = new ArrayList<>();
 
         if (!file.isEmpty()) {
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes());
@@ -54,9 +57,9 @@ public class XSLXParser {
 
                         Double weight = weightCell.getNumericCellValue();
 
-                        TemplateInfo templateInfo = craeteTemplateInfo(address, client, weight);
+                        Task task = createTask(address, client, weight);
 
-                        templateEntities.add(templateInfo);
+                        templateEntities.add(task);
                     }
                 }
             } catch (RuntimeException | IOException e) {
@@ -67,13 +70,13 @@ public class XSLXParser {
         return templateEntities;
     }
 
-    private TemplateInfo craeteTemplateInfo(String address, String client, Double weight) {
-        return TemplateInfo.builder()
-                .address(address)
-                .client(client)
-                .weight(weight)
-                .build();
-    }
+        private Task createTask(String address, String client, Double weight) {
+           Task task = new Task();
+           task.setAddressDetails(address);
+           task.setDescription(client);
+           task.setDeliveryWeight(weight);
+           return task;
+        }
 
     String getClientName(String location) {
         String[] locationParts = location.split(" +");

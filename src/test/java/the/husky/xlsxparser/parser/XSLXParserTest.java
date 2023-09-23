@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
-import the.husky.xlsxparser.entity.TemplateInfo;
+import the.husky.xlsxparser.entity.Task;
 import the.husky.xlsxparser.web.exception.XSLXParserException;
 
 import java.io.File;
@@ -29,7 +29,6 @@ class XSLXParserTest {
             "280 школа Євгенія Харченка вул., 23Б, Євгенія Харченка вул., 23Б";
     private final static String LOCATION_GYMNASIUM =
             "Київська Русь Гімназія Бориса Гмирі вул., 2В, Бориса Гмирі вул., 2В";
-        private static final int SHEET_INDEX = 0;
 
     @Autowired private XSLXParser xslxParser;
 
@@ -64,7 +63,7 @@ class XSLXParserTest {
 
         MultipartFile multipartFile = getMultipartFile(fileContent);
 
-        List<TemplateInfo> list = xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX);
+        List<Task> list = xslxParser.parseXlsxFile(multipartFile);
 
         int expectedSize = 36;
         String expectedJson = getExpectedJson();
@@ -86,7 +85,7 @@ class XSLXParserTest {
         MultipartFile multipartFile = getMultipartFile(fileContent);
 
         Throwable thrown = assertThrows
-                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX));
+                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile));
 
         String expectedErrorMessage = "Error occurred while parsing xlsx file";
         String actualErrorMessage = thrown.getMessage();
@@ -106,7 +105,7 @@ class XSLXParserTest {
                 fileContent);
 
         Throwable thrown = assertThrows
-                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile, SHEET_INDEX));
+                (XSLXParserException.class, () -> xslxParser.parseXlsxFile(multipartFile));
 
         String expectedErrorMessage = "Error occurred while parsing xlsx file";
         String actualErrorMessage = thrown.getMessage();
@@ -121,7 +120,7 @@ class XSLXParserTest {
                 fileContent);
     }
 
-    private String templateInfoToJson(TemplateInfo templateInfo) throws JsonProcessingException {
+    private String templateInfoToJson(Task templateInfo) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         return objectMapper.writeValueAsString(templateInfo).replaceAll("\r\n", "\n");
