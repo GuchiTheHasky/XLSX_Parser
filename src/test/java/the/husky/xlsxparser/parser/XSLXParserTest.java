@@ -69,7 +69,7 @@ class XSLXParserTest {
         String expectedJson = getExpectedJson();
 
         int actualSize = list.size();
-        String actualJson = templateInfoToJson(list.get(0));
+        String actualJson = templateInfoToJson(list.get(0)).replaceAll("\r\n", "\n");
 
         assertNotNull(list);
         assertEquals(expectedSize, actualSize);
@@ -139,9 +139,20 @@ class XSLXParserTest {
     private String getExpectedJson() {
         return """
                 {
-                  "address" : "Сімферопольська вул., 10, Сімферопольська вул., 10",
-                  "client" : "105 школа",
-                  "weight" : 145.7
+                  "id" : null,
+                  "description" : "105 школа",
+                  "executionDate" : null,
+                  "mapPoint" : null,
+                  "carId" : null,
+                  "deliveryStart" : null,
+                  "deliveryFinish" : null,
+                  "frozen" : null,
+                  "deliveryWeight" : 145.7,
+                  "pickupWeight" : null,
+                  "dropped" : null,
+                  "routePointId" : null,
+                  "addressDetails" : "Сімферопольська вул., 10, Сімферопольська вул., 10",
+                  "requestedCarId" : null
                 }""";
     }
 }
